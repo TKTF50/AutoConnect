@@ -43,9 +43,10 @@ They contain in ```AutoConnectDefs.h```.
 AutoConnect()
 ```
 
-<a id="withparameter"></a>
-
 AutoConnect default constructor. This entry internally allocates the ESP8266WebServer for ESP8266 or WebServer for ESP32 and is activated internally.
+
+AutoConnect will call the user added handler to respond to the HTTP request using the [**ESP8266WebServer::on**](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WebServer#client-request-handlers) (WebServer::on for ESP32) funtion. This call will be made from during the [**handleClient**](api.md#handleclient) of AutoConnect function.  
+Therefore, in the use case of assigning AutoConnect in this constructor, it is necessary to know the instance of ESP8266WebServer in order to register the request handler. Sketch can use [**host**](api.md#host) functions to obtain a reference to an ESP8266WebServer instance that is internally hosted by AutoConnect.
 
 - For ESP8266
 
@@ -59,9 +60,7 @@ AutoConnect(ESP8266WebServer& webServer)
 AutoConnect(WebServer& webServer)
 ```
 
-Run the AutoConnect site using the externally ensured ESP8266WebServer for ESP8266 or WebServer for ESP32.
-
-The [**handleClient**](api.md#handleclient) function of AutoConnect can include the response of the URI handler added by the user using the "*on*" function of ESP8266WebServer/WebServer. If ESP8266WebServer/WebServer is assigned internally by AutoConnect, the Sketch can obtain that reference with the [**host**](api.md#host) function.<dl class="apidl">
+Run the AutoConnect site using the externally ensured ESP8266WebServer for ESP8266 or WebServer for ESP32.<dl class="apidl">
     <dt>**Parameter**</dt>
     <dd><span class="apidef">webServer</span><span class="apidesc">A reference of ESP8266WebServer or WebServer instance.</span></dd></dl>
 
@@ -86,6 +85,7 @@ AutoConnectAux* append(const String& uri, const String& title, ESP8266WebServer:
 ```cpp
 AutoConnectAux* append(const String& uri, const String& title, WebServer::THandlerFunction handler)
 ```
+
 Creates an AutoConnectAux dynamically with the specified URI and integrates it into the menu. Calls with a request handler parameter can use this function as menu registration for a legacy page of ESP8266WebServer/WebServer. If the **handler** parameter specified, also it will register the request handler for the ESP8266WebServer/WebServer.  
 AutoConnect manages the menu items using a sequence list, and this function always adds the item to the end of the list. Therefore, the order of the menu items is the additional order.  
 Returns the pointer to created AutoConnectAux instance, the `nullptr` if an AutoConnectAux with the same URI already exists.<dl class="apidl">
@@ -104,6 +104,7 @@ Returns the pointer to created AutoConnectAux instance, the `nullptr` if an Auto
 ```cpp
 AutoConnectAux* aux(const String& uri) const
 ```
+
 Returns a pointer to AutoConnectAux with the URI specified by *uri*. If AutoConnectAux with that URI is not bound, it returns **nullptr**.<dl class="apidl">
     <dt>**Parameter**</dt>
     <dd><span class="apidef">uri</span><span class="apidesc">A string of the URI.</span></dd>
@@ -115,10 +116,16 @@ Returns a pointer to AutoConnectAux with the URI specified by *uri*. If AutoConn
 
 ```cpp
 bool begin()
-```  
+```
+
+<p></p>
+
 ```cpp
 bool begin(const char* ssid, const char* passphrase)
-```  
+```
+
+<p></p>
+
 ```cpp
 bool begin(const char* ssid, const char* passphrase, unsigned long timeout)
 ```
@@ -138,7 +145,10 @@ The captive portal will not be started if the connection has been established wi
 
 ```cpp
 bool config(AutoConnectConfig& config)
-```  
+```
+
+<p></p>
+
 ```cpp
 bool config(const char* ap, const char* password = nullptr)
 ```
@@ -153,9 +163,11 @@ Set AutoConnect configuration settings.<dl class="apidl">
     <dd><span class="apidef">false</span><span class="aidesc">Configuration parameter is invalid, some values out of range.</span></dd></dl>
 
 ### <i class="fa fa-caret-right"></i> detach
+
 ```cpp
 bool detach(const String& uri)
 ```
+
 Detach the AutoConnectAux with the specified URI from the management of AutoConnect. An unmanaged AutoConnectAux will no longer appear in menu items, and its page handler will no longer respond even if the URI is accessed directly.<dl class="apidl">
     <dt>**Parameter**</dt>
     <dd><span class="apidef">uri</span><span class="apidesc">URI of AutoConnectAux to be detached.</span></dd>
@@ -301,6 +313,9 @@ Returns the reference of the ESP8266WebServer/WebServer which is allocated in Au
 ```cpp
 void join(AutoConnectAux& aux)
 ```
+
+<p></p>
+
 ```cpp
 void join(std::vector<std::reference_wrapper<AutoConnectAux>> aux)
 ```
@@ -314,12 +329,21 @@ Join the AutoConnectAux object to AutoConnect. AutoConnectAux objects can be joi
 ```cpp
 bool load(const String& aux)
 ```
+
+<p></p>
+
 ```cpp
 bool load(PGM_P aux)
 ```
+
+<p></p>
+
 ```cpp
 bool load(const __FlashStringHelper* aux)
 ```
+
+<p></p>
+
 ```cpp
 bool load(Stream& aux)
 ```
@@ -362,7 +386,7 @@ Register the function which will call from AutoConnect at the WiFi connection es
     <dt>**Parameter**</dt>
     <dd><span class="apidef">fn</span><span class="apidesc">Function called at the WiFi connected.</span></dd></dl>
 
-An *fn* specifies the function called when the WiFi connected. Its prototype declaration is defined as "*ConnectExit_ft*".
+An *fn* specifies the function called when the WiFi connected. Its prototype declaration is defined as *ConnectExit_ft*.
 
 ```cpp
 typedef std::function<void(IPAddress& localIP)>  ConnectExit_ft;
@@ -383,7 +407,7 @@ Register the function which will call from AutoConnect at the start of the capti
     <dt>**Parameter**</dt>
     <dd><span class="apidef">fn</span><span class="apidesc">Function called at the captive portal start.</span></dd></dl>
 
-An *fn* specifies the function called when the captive portal starts. Its prototype declaration is defined as "*DetectExit_ft*".
+An *fn* specifies the function called when the captive portal starts. Its prototype declaration is defined as *DetectExit_ft*.
 
 ```cpp
 typedef std::function<bool(IPAddress& softapIP)>  DetectExit_ft
@@ -418,6 +442,7 @@ Register the handler function for undefined URL request detected.<dl class="apid
 
 ### <i class="fa fa-caret-right"></i> where
 
+
 ```cpp
 String where(void)
 ```
@@ -440,7 +465,7 @@ Register the function which will call from AutoConnect during a stay in the capt
     <dt>**Parameter**</dt>
     <dd><span class="apidef">fn</span><span class="apidesc">Function called at the captive portal start.</span></dd></dl>
 
-An *fn* specifies the function called while staying in the captive portal. Its prototype declaration is defined as "*WhileCaptivePortalExit_ft*".
+An *fn* specifies the function called while staying in the captive portal. Its prototype declaration is defined as *WhileCaptivePortalExit_ft*.
 
 ```cpp
 typedef std::function<bool(void)>   WhileCaptivePortalExit_ft

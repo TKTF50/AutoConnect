@@ -128,11 +128,6 @@ static const char AUX_mqtt_setting[] PROGMEM = R"raw(
         "checked": 1
       },
       {
-        "name": "newline",
-        "type": "ACElement",
-        "value": "<hr>"
-      },
-      {
         "name": "hostname",
         "type": "ACInput",
         "value": "",
@@ -339,23 +334,24 @@ void handleRoot() {
 // Clear channel using ThingSpeak's API.
 void handleClearChannel() {
   HTTPClient  httpClient;
-  WiFiClient  client;
+
   String  endpoint = serverName;
   endpoint.replace("mqtt", "api");
   String  delUrl = "http://" + endpoint + "/channels/" + channelId + "/feeds.json?api_key=" + userKey;
 
   Serial.print("DELETE " + delUrl);
-  if (httpClient.begin(client, delUrl)) {
+  if (httpClient.begin(wifiClient, delUrl)) {
     Serial.print(":");
     int resCode = httpClient.sendRequest("DELETE");
-    String  res = httpClient.getString();
+    const String& res = httpClient.getString();
+    Serial.println(String(resCode) + String(",") + res);
     httpClient.end();
-    Serial.println(String(resCode) + "," + res);
   }
   else
     Serial.println(" failed");
 
-  // Returns the redirect response.
+  // Returns the redirect response. The page is reloaded and its contents
+  // are updated to the state after deletion.
   WiFiWebServer&  webServer = portal.host();
   webServer.sendHeader("Location", String("http://") + webServer.client().localIP().toString() + String("/"));
   webServer.send(302, "text/plain", "");
